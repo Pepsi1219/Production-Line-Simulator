@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IE Line Simulator Pro v3</title>
+    <title>IE Line Simulator Pro v3 - Full Screen & Edit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* สไตล์เพิ่มเติมสำหรับช่อง Input ตอนแก้ไข */
+        .edit-input { width: 100%; padding: 4px; border: 1px solid #3b82f6; border-radius: 4px; text-align: center; }
+    </style>
 </head>
-<body class="bg-slate-50 p-4 md:p-8">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-xl">
-        <h1 class="text-3xl font-extrabold mb-6 text-slate-800 border-b pb-4">Line Balancing Simulator <span class="text-blue-600">Pro v3</span></h1>
+<body class="bg-slate-50 p-4">
+    <div class="max-w-none mx-auto bg-white p-6 rounded-2xl shadow-xl min-h-screen">
+        <h1 class="text-3xl font-extrabold mb-6 text-slate-800 border-b pb-4">Line Balancing Simulator <span class="text-blue-600">Pro v3 (Full Screen)</span></h1>
         
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8 bg-slate-100 p-4 rounded-xl shadow-inner">
             <input type="text" id="newOpNo" placeholder="Op No." class="p-2 border rounded">
@@ -27,14 +31,14 @@
                 <button onclick="changeHour(1)" class="bg-white border-2 border-slate-300 text-slate-600 px-4 py-1 rounded-lg font-black hover:bg-slate-200">+</button>
             </div>
             <div class="flex-grow text-right">
-                <span class="text-slate-500 font-medium">Final Output:</span>
-                <span id="finalOutput" class="text-5xl font-black text-green-600 ml-2">0</span> <span class="text-slate-400">Pcs</span>
+                <span class="text-slate-500 font-medium text-xl">Final Output:</span>
+                <span id="finalOutput" class="text-6xl font-black text-green-600 ml-2">0</span> <span class="text-slate-400 text-xl">Pcs</span>
             </div>
         </div>
 
         <div class="overflow-x-auto rounded-xl border border-slate-200 mb-8 shadow-sm">
             <table class="w-full text-left">
-                <thead class="bg-slate-800 text-white text-sm">
+                <thead class="bg-slate-800 text-white text-sm uppercase">
                     <tr>
                         <th class="p-4">No.</th>
                         <th class="p-4 text-center">SAM</th>
@@ -46,25 +50,24 @@
                         <th class="p-4 text-center">Manage</th>
                     </tr>
                 </thead>
-                <tbody id="opTableBody" class="divide-y divide-slate-200"></tbody>
+                <tbody id="opTableBody" class="divide-y divide-slate-200 text-base"></tbody>
             </table>
         </div>
 
         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-            <h2 class="text-lg font-bold mb-4 text-slate-700">Visual WIP Analysis (Real-time)</h2>
-            <div class="h-64">
-                <canvas id="lineChart"></canvas>
+            <h2 class="text-lg font-bold mb-4 text-slate-700 uppercase tracking-wider">Visual WIP Analysis (Full Scale)</h2>
+            <div class="h-96"> <canvas id="lineChart"></canvas>
             </div>
         </div>
     </div>
 
     <script>
-        // Initial Data อิงจากรูปภาพของคุณ
+        // เพิ่ม property 'isEditing' เพื่อควบคุมสถานะการแก้ไข
         let operations = [
-            { id: "1", sam: 16.0, amv: 16.02, op: 1 },
-            { id: "2", sam: 13.7, amv: 10, op: 0.28 },
-            { id: "3", sam: 15.0, amv: 11.5, op: 0.35 },
-            { id: "18", sam: 45.62, amv: 46.25, op: 1.18 }
+            { id: "1", sam: 16.0, amv: 16.02, op: 1, isEditing: false },
+            { id: "2", sam: 13.7, amv: 10, op: 0.28, isEditing: false },
+            { id: "3", sam: 15.0, amv: 11.5, op: 0.35, isEditing: false },
+            { id: "18", sam: 45.62, amv: 46.25, op: 1.18, isEditing: false }
         ];
 
         let myChart;
@@ -75,8 +78,8 @@
             const amv = parseFloat(document.getElementById('newAMV').value);
             const op = parseFloat(document.getElementById('newOp').value);
 
-            if(no && sam && amv && op) {
-                operations.push({ id: no, sam, amv, op });
+            if(no && !isNaN(sam) && !isNaN(amv) && !isNaN(op)) {
+                operations.push({ id: no, sam, amv, op, isEditing: false });
                 simulate();
                 document.getElementById('newOpNo').value = '';
                 document.getElementById('newSAM').value = '';
@@ -87,7 +90,29 @@
             }
         }
 
-        // เพิ่มฟังก์ชันลบขั้นตอน
+        // ฟังก์ชันเริ่มแก้ไข
+        function toggleEdit(index) {
+            operations[index].isEditing = !operations[index].isEditing;
+            simulate();
+        }
+
+        // ฟังก์ชันบันทึกข้อมูลที่แก้ไข
+        function saveEdit(index) {
+            const sam = parseFloat(document.getElementById(`editSAM-${index}`).value);
+            const amv = parseFloat(document.getElementById(`editAMV-${index}`).value);
+            const op = parseFloat(document.getElementById(`editOp-${index}`).value);
+
+            if(!isNaN(sam) && !isNaN(amv) && !isNaN(op)) {
+                operations[index].sam = sam;
+                operations[index].amv = amv;
+                operations[index].op = op;
+                operations[index].isEditing = false;
+                simulate();
+            } else {
+                alert("ข้อมูลไม่ถูกต้อง");
+            }
+        }
+
         function deleteOperation(index) {
             if(confirm('คุณแน่ใจว่าต้องการลบขั้นตอนที่ ' + operations[index].id + ' หรือไม่?')) {
                 operations.splice(index, 1);
@@ -109,9 +134,7 @@
                 const capHr = Math.floor(outputPerM * item.op);
                 const totalCap = capHr * hours;
 
-                // Logic: งานที่ป้อนเข้า = งานที่เสร็จจากขั้นตอนก่อนหน้า
                 let inputFromPrev = (index === 0) ? totalCap : operations[index-1].doneSoFar;
-                
                 let actualDone = Math.min(inputFromPrev, totalCap);
                 let wip = inputFromPrev - actualDone;
                 item.doneSoFar = actualDone;
@@ -120,20 +143,32 @@
                 wipData.push(wip);
                 doneData.push(actualDone);
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition">
+                // ตรวจสอบว่ากำลังแก้ไขอยู่หรือไม่เพื่อแสดงผล Row
+                const rowHtml = `
+                    <tr class="${item.isEditing ? 'bg-yellow-50' : 'hover:bg-slate-50'} transition">
                         <td class="p-4 font-bold text-slate-700">${item.id}</td>
-                        <td class="p-4 text-center text-slate-500">${item.sam}</td>
-                        <td class="p-4 text-center text-blue-600 font-bold border-x border-slate-100">${item.amv}</td>
-                        <td class="p-4 text-center">${item.op}</td>
+                        <td class="p-4 text-center">
+                            ${item.isEditing ? `<input type="number" id="editSAM-${index}" step="0.01" value="${item.sam}" class="edit-input">` : item.sam}
+                        </td>
+                        <td class="p-4 text-center text-blue-600 font-bold border-x border-slate-100">
+                            ${item.isEditing ? `<input type="number" id="editAMV-${index}" step="0.01" value="${item.amv}" class="edit-input">` : item.amv}
+                        </td>
+                        <td class="p-4 text-center">
+                            ${item.isEditing ? `<input type="number" id="editOp-${index}" step="0.01" value="${item.op}" class="edit-input">` : item.op}
+                        </td>
                         <td class="p-4 text-center font-bold text-blue-900 bg-blue-50">${capHr}</td>
                         <td class="p-4 text-center font-black ${wip > 0 ? 'text-orange-600' : 'text-slate-300'}">${wip.toLocaleString()}</td>
                         <td class="p-4 text-center font-black text-green-700 bg-green-50">${actualDone.toLocaleString()}</td>
-                        <td class="p-4 text-center">
+                        <td class="p-4 text-center flex gap-2 justify-center">
+                            ${item.isEditing ? 
+                                `<button onclick="saveEdit(${index})" class="bg-green-500 text-white px-3 py-1 rounded font-bold text-xs">Save</button>` : 
+                                `<button onclick="toggleEdit(${index})" class="text-blue-600 hover:bg-blue-100 font-bold text-xs border border-blue-200 px-2 py-1 rounded">แก้ไข</button>`
+                            }
                             <button onclick="deleteOperation(${index})" class="text-red-500 hover:text-red-700 font-bold text-sm bg-red-50 px-2 py-1 rounded">ลบ</button>
                         </td>
                     </tr>
                 `;
+                tbody.innerHTML += rowHtml;
 
                 if (index === operations.length - 1) {
                     document.getElementById('finalOutput').innerText = actualDone.toLocaleString();
@@ -152,29 +187,15 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: 'WIP (งานค้างชิ้น)',
-                            data: wipData,
-                            backgroundColor: '#f97316',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Actual Output (งานเสร็จ)',
-                            data: doneData,
-                            backgroundColor: '#15803d',
-                            borderRadius: 4
-                        }
+                        { label: 'WIP (งานค้างชิ้น)', data: wipData, backgroundColor: '#f97316', borderRadius: 4 },
+                        { label: 'Actual Output (งานเสร็จ)', data: doneData, backgroundColor: '#15803d', borderRadius: 4 }
                     ]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
