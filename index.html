@@ -3,39 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IE Line Simulator Pro v4 - Full Analysis</title>
+    <title>IE Line Simulator Pro v5.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .edit-input { width: 100%; padding: 4px; border: 1px solid #3b82f6; border-radius: 4px; text-align: center; font-size: 14px; }
-        .summary-card { bg-white border border-slate-200 p-3 rounded-lg shadow-sm; }
+        .edit-input { width: 100%; padding: 2px; border: 1px solid #3b82f6; border-radius: 4px; text-align: center; font-size: 13px; }
+        th, td { white-space: nowrap; }
+        .col-manage { width: 85px; text-align: center; }
     </style>
 </head>
 <body class="bg-slate-50 p-4">
     <div class="max-w-none mx-auto bg-white p-6 rounded-2xl shadow-xl min-h-screen">
         <h1 class="text-3xl font-extrabold mb-6 text-slate-800 border-b pb-4 flex justify-between items-center">
-            <div>Line Balancing & WIP Simulator <span class="text-blue-600">Pro v4</span></div>
-            <div class="text-sm font-normal text-slate-500">Industry Standard Calculation</div>
+            <div>Line Balancing <span class="text-blue-600">Pro v5.3</span></div>
+            <div class="text-sm font-normal text-slate-500 italic">WIP, Flow & Takt Chart</div>
         </h1>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-800 p-6 rounded-xl text-white shadow-lg">
             <div>
-                <label class="block text-xs uppercase text-slate-400 mb-1">ยอดคำสั่งผลิต (Pcs)</label>
+                <label class="block text-xs uppercase text-slate-400 mb-1">ยอดผลิตเป้าหมาย (Pcs)</label>
                 <input type="number" id="targetDemand" value="600" oninput="simulate()" class="w-full p-2 bg-slate-700 border border-slate-600 rounded font-bold text-xl outline-none focus:ring-2 ring-blue-500">
             </div>
             <div>
-                <label class="block text-xs uppercase text-slate-400 mb-1">ระยะเวลาผลิต (Days)</label>
+                <label class="block text-xs uppercase text-slate-400 mb-1">เวลาทำงาน (Days)</label>
                 <input type="number" id="targetDays" value="1" oninput="simulate()" class="w-full p-2 bg-slate-700 border border-slate-600 rounded font-bold text-xl outline-none focus:ring-2 ring-blue-500">
             </div>
             <div class="flex flex-col justify-center border-l border-slate-600 pl-4">
-                <span class="text-xs uppercase text-slate-400">Takt Time (Requirement)</span>
+                <span class="text-xs uppercase text-slate-400">Takt Time (Target)</span>
                 <span id="calcTaktTime" class="text-3xl font-black text-yellow-400">0.00</span>
-                <span class="text-[10px] text-slate-400">sec / pcs (Based on 7 hrs net)</span>
+                <span class="text-[10px] text-slate-400 italic">sec / pcs</span>
             </div>
             <div class="flex flex-col justify-center border-l border-slate-600 pl-4">
-                <span class="text-xs uppercase text-slate-400">Required Output / Hr</span>
+                <span class="text-xs uppercase text-slate-400">Req. Output / Hr</span>
                 <span id="reqOutputHr" class="text-3xl font-black text-blue-400">0.00</span>
-                <span class="text-[10px] text-slate-400">pcs / hour</span>
+                <span class="text-[10px] text-slate-400 italic">pcs / hour</span>
             </div>
         </div>
 
@@ -44,86 +45,42 @@
             <input type="number" id="newSAM" placeholder="SAM" class="p-2 border rounded" step="0.01">
             <input type="number" id="newAMV" placeholder="AMV" class="p-2 border rounded" step="0.01">
             <input type="number" id="newOp" placeholder="Operator" class="p-2 border rounded" step="0.01">
-            <button onclick="addOperation()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 shadow-md">Add Operation</button>
+            <button onclick="addOperation()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition">Add Op</button>
         </div>
 
-        <div class="flex items-center gap-6 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
-            <div class="flex items-center gap-3">
-                <span class="font-bold text-slate-700">ชั่วโมงทำงานที่ต้องการ Simulate:</span>
-                <button onclick="changeHour(-1)" class="bg-white border-2 border-slate-300 text-slate-600 px-4 py-1 rounded-lg font-black">-</button>
-                <input type="number" id="simHours" value="1" readonly class="w-16 text-center text-3xl font-black bg-transparent text-blue-600">
-                <button onclick="changeHour(1)" class="bg-white border-2 border-slate-300 text-slate-600 px-4 py-1 rounded-lg font-black">+</button>
-            </div>
+        <div class="flex items-center gap-4 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <span class="font-bold text-slate-700">Simulate Time:</span>
+            <button onclick="changeHour(-1)" class="bg-white border-2 border-slate-300 text-slate-600 px-3 py-1 rounded-lg font-black">-</button>
+            <input type="number" id="simHours" value="1" readonly class="w-12 text-center text-3xl font-black bg-transparent text-blue-600">
+            <button onclick="changeHour(1)" class="bg-white border-2 border-slate-300 text-slate-600 px-3 py-1 rounded-lg font-black">+</button>
+            <span class="font-bold text-slate-700 text-sm">Hr(s)</span>
             <div class="ml-auto text-right">
                 <span class="text-slate-500 font-medium">Accumulated Output:</span>
-                <span id="finalOutput" class="text-5xl font-black text-green-600 ml-2">0</span> <span class="text-slate-400">Pcs</span>
+                <span id="finalOutput" class="text-4xl font-black text-green-600 ml-2">0</span>
             </div>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-slate-200 mb-8 shadow-sm bg-white">
-            <table class="w-full text-left">
-                <thead class="bg-slate-800 text-white text-xs uppercase tracking-wider">
+        <div class="overflow-x-auto rounded-xl border border-slate-200 mb-8 shadow-sm">
+            <table class="w-full text-left bg-white">
+                <thead class="bg-slate-800 text-white text-[10px] uppercase">
                     <tr>
                         <th class="p-4">No.</th>
                         <th class="p-4 text-center">SAM</th>
                         <th class="p-4 text-center">AMV</th>
                         <th class="p-4 text-center bg-blue-700">Eff (%)</th>
-                        <th class="p-4 text-center">Operator</th>
+                        <th class="p-4 text-center">Op</th>
                         <th class="p-4 text-center bg-blue-900">Cap/Hr</th>
-                        <th class="p-4 text-center bg-orange-600 text-white">WIP</th>
-                        <th class="p-4 text-center bg-green-700 text-white">Done</th>
-                        <th class="p-4 text-center">Manage</th>
+                        <th class="p-4 text-center bg-orange-600">WIP (ค้าง)</th>
+                        <th class="p-4 text-center bg-green-700">Done (Flow)</th>
+                        <th class="p-4 col-manage">Manage</th>
                     </tr>
                 </thead>
-                <tbody id="opTableBody" class="divide-y divide-slate-200"></tbody>
+                <tbody id="opTableBody" class="divide-y divide-slate-200 text-sm font-medium"></tbody>
             </table>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Total SAM</div>
-                <div id="sumSAM" class="text-2xl font-black text-slate-700">0.00</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Total AMV</div>
-                <div id="sumAMV" class="text-2xl font-black text-slate-700">0.00</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Total Operator</div>
-                <div id="sumOp" class="text-2xl font-black text-slate-700">0.00</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Efficiency (Line)</div>
-                <div id="avgEff" class="text-2xl font-black text-blue-600">0%</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Balance (%)</div>
-                <div id="balance" class="text-2xl font-black text-purple-600">0%</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Pitch Time</div>
-                <div id="pitchTime" class="text-2xl font-black text-slate-700">0.00</div>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">UCL Time (+5%)</div>
-                <div id="uclTime" class="text-xl font-bold text-red-500">0.00</div>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">LCL Time (-5%)</div>
-                <div id="lclTime" class="text-xl font-bold text-red-500">0.00</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Max. Cycle Time</div>
-                <div id="maxCycle" class="text-2xl font-black text-red-600">0.00</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2">
-                <div class="text-[10px] text-slate-400 uppercase font-bold">Total Output (Calculated)</div>
-                <div id="totalOutputPcs" class="text-2xl font-black text-green-600">0 Pcs./Hr.</div>
-            </div>
-        </div>
-
         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
-            <h2 class="text-lg font-bold mb-4 text-slate-700 uppercase">WIP & Flow Visualization</h2>
+            <h2 class="text-lg font-bold mb-4 text-slate-700 uppercase italic">WIP & Flow Analysis vs Takt Time</h2>
             <div class="h-96">
                 <canvas id="lineChart"></canvas>
             </div>
@@ -132,35 +89,44 @@
 
     <script>
         let operations = [
-            { id: "1", sam: 16.0, amv: 16.02, op: 1, isEditing: false },
-            { id: "2", sam: 13.7, amv: 14.5, op: 0.28, isEditing: false },
-            { id: "3", sam: 15.0, amv: 15.5, op: 0.35, isEditing: false },
-            { id: "18", sam: 45.62, amv: 46.25, op: 1.18, isEditing: false }
-        ];
+    { id: "1", sam: 16.0, amv: 16.02, op: 1.0, isEditing: false },
+    { id: "2", sam: 13.7, amv: 10, op: 1.0, isEditing: false },
+    { id: "3", sam: 15.0, amv: 11.5, op: 1.0, isEditing: false },
+    { id: "4", sam: 28.3, amv: 25, op: 1.0, isEditing: false },
+    { id: "5", sam: 21.8, amv: 25, op: 1.0, isEditing: false },
+    { id: "6", sam: 19.3, amv: 16, op: 1.0, isEditing: false },
+    { id: "7", sam: 13.7, amv: 10, op: 1.0, isEditing: false },
+    { id: "8", sam: 16.8, amv: 12, op: 1.0, isEditing: false },
+    { id: "9", sam: 23.9, amv: 22.5, op: 1.0, isEditing: false },
+    { id: "10", sam: 25.1, amv: 17, op: 1.0, isEditing: false },
+    { id: "11", sam: 7.64, amv: 8, op: 1.0, isEditing: false },
+    { id: "12", sam: 21.81, amv: 20, op: 1.0, isEditing: false },
+    { id: "13", sam: 35.06, amv: 24, op: 1.0, isEditing: false },
+    { id: "14", sam: 22.06, amv: 18, op: 1.0, isEditing: false },
+    { id: "15", sam: 17.12, amv: 6, op: 1.0, isEditing: false },
+    { id: "16", sam: 42.39, amv: 28, op: 1.0, isEditing: false },
+    { id: "17", sam: 33.14, amv: 29, op: 1.0, isEditing: false },
+    { id: "18", sam: 45.62, amv: 46.25, op: 1.0, isEditing: false },
+    { id: "19", sam: 39.59, amv: 31, op: 1.0, isEditing: false },
+    { id: "20", sam: 29.86, amv: 27, op: 1.0, isEditing: false },
+    { id: "21", sam: 8.65, amv: 8.65, op: 1.0, isEditing: false },
+    { id: "22", sam: 35.83, amv: 22.67, op: 1.0, isEditing: false }
+];
 
-        let myChart;
+        let myChart = null;
 
         function addOperation() {
             const no = document.getElementById('newOpNo').value;
             const sam = parseFloat(document.getElementById('newSAM').value);
             const amv = parseFloat(document.getElementById('newAMV').value);
             const op = parseFloat(document.getElementById('newOp').value);
-
             if(no && !isNaN(sam) && !isNaN(amv) && !isNaN(op)) {
                 operations.push({ id: no, sam, amv, op, isEditing: false });
                 simulate();
-                document.getElementById('newOpNo').value = '';
-                document.getElementById('newSAM').value = '';
-                document.getElementById('newAMV').value = '';
-                document.getElementById('newOp').value = '';
             }
         }
 
-        function toggleEdit(index) {
-            operations[index].isEditing = !operations[index].isEditing;
-            simulate();
-        }
-
+        function toggleEdit(index) { operations[index].isEditing = !operations[index].isEditing; simulate(); }
         function saveEdit(index) {
             operations[index].sam = parseFloat(document.getElementById(`editSAM-${index}`).value);
             operations[index].amv = parseFloat(document.getElementById(`editAMV-${index}`).value);
@@ -168,115 +134,118 @@
             operations[index].isEditing = false;
             simulate();
         }
-
-        function deleteOperation(index) {
-            if(confirm('Confirm Delete?')) {
-                operations.splice(index, 1);
-                simulate();
-            }
-        }
+        function deleteOperation(index) { if(confirm('Delete?')) { operations.splice(index, 1); simulate(); } }
 
         function simulate() {
-            // 1. คำนวณ Takt Time จาก Header
             const demand = parseFloat(document.getElementById('targetDemand').value) || 0;
             const days = parseFloat(document.getElementById('targetDays').value) || 1;
-            const netSecPerDay = 7 * 3600; // 7 ชั่วโมง
-            const taktTime = (demand > 0) ? (netSecPerDay * days / demand) : 0;
-            const reqOutputHr = (demand > 0) ? (demand / (7 * days)) : 0;
+            const taktTime = (demand > 0) ? (7 * 3600 * days / demand) : 0;
+            const reqOutHr = (demand > 0) ? (demand / (7 * days)) : 0;
 
             document.getElementById('calcTaktTime').innerText = taktTime.toFixed(2);
-            document.getElementById('reqOutputHr').innerText = reqOutputHr.toFixed(2);
+            document.getElementById('reqOutputHr').innerText = reqOutHr.toFixed(2);
 
             const hours = parseInt(document.getElementById('simHours').value);
             const tbody = document.getElementById('opTableBody');
             tbody.innerHTML = '';
 
-            let labels = []; let wipData = []; let doneData = [];
-            let totalSAM = 0; let totalAMV = 0; let totalOp = 0;
-            let maxCycleTime = 0;
+            let labels = []; 
+            let wipData = []; 
+            let doneData = [];
 
-            operations.forEach((item, index) => {
-                const eff = ((item.sam / item.amv) * 100).toFixed(1);
-                const outputPerM = Math.ceil(3600 / item.amv);
-                const capHr = Math.floor(outputPerM * item.op);
-                const totalCap = capHr * hours;
+            // Pre-calculate
+            let stepResults = operations.map(item => {
+                const capHr = Math.floor((3600 / item.amv) * item.op);
+                return { ...item, capHr };
+            });
 
-                let inputFromPrev = (index === 0) ? totalCap : operations[index-1].doneSoFar;
-                let actualDone = Math.min(inputFromPrev, totalCap);
-                let wip = inputFromPrev - actualDone;
-                item.doneSoFar = actualDone;
+            // Logic WIP & Flow
+            stepResults.forEach((item, index) => {
+                const totalCap = item.capHr * hours;
+                let inputFromPrev = (index === 0) ? totalCap : stepResults[index-1].passed;
+                let actualProcessed = Math.min(inputFromPrev, totalCap);
+                
+                let nextCap = (index === stepResults.length - 1) ? actualProcessed : (stepResults[index+1].capHr * hours);
+                
+                let wip = Math.max(0, actualProcessed - nextCap);
+                let passed = actualProcessed - wip;
 
-                // Stats collection
-                totalSAM += item.sam;
-                totalAMV += item.amv;
-                totalOp += item.op;
-                const cyclePerMan = item.amv / item.op;
-                if(cyclePerMan > maxCycleTime) maxCycleTime = cyclePerMan;
-
+                item.passed = passed;
                 labels.push("Op " + item.id);
                 wipData.push(wip);
-                doneData.push(actualDone);
+                doneData.push(passed);
 
                 tbody.innerHTML += `
                     <tr class="${item.isEditing ? 'bg-yellow-50' : 'hover:bg-slate-50'} border-b">
-                        <td class="p-4 font-bold">${item.id}</td>
+                        <td class="p-4 font-bold text-slate-700">${item.id}</td>
                         <td class="p-4 text-center">${item.isEditing ? `<input type="number" id="editSAM-${index}" value="${item.sam}" class="edit-input">` : item.sam}</td>
                         <td class="p-4 text-center">${item.isEditing ? `<input type="number" id="editAMV-${index}" value="${item.amv}" class="edit-input">` : item.amv}</td>
-                        <td class="p-4 text-center font-bold text-blue-700 bg-blue-50">${eff}%</td>
+                        <td class="p-4 text-center font-bold text-blue-700 bg-blue-50">${((item.sam/item.amv)*100).toFixed(1)}%</td>
                         <td class="p-4 text-center">${item.isEditing ? `<input type="number" id="editOp-${index}" value="${item.op}" class="edit-input">` : item.op}</td>
-                        <td class="p-4 text-center font-bold text-blue-900">${capHr}</td>
+                        <td class="p-4 text-center font-bold text-blue-900">${item.capHr}</td>
                         <td class="p-4 text-center font-black ${wip > 0 ? 'text-orange-600' : 'text-slate-300'}">${wip.toLocaleString()}</td>
-                        <td class="p-4 text-center font-black text-green-700 bg-green-50">${actualDone.toLocaleString()}</td>
-                        <td class="p-4 text-center">
-                            ${item.isEditing ? 
-                                `<button onclick="saveEdit(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs">Save</button>` : 
-                                `<button onclick="toggleEdit(${index})" class="text-blue-600 font-bold text-xs mr-2 border border-blue-200 px-2 py-1 rounded">แก้ไข</button>`
-                            }
-                            <button onclick="deleteOperation(${index})" class="text-red-500 font-bold text-xs">ลบ</button>
+                        <td class="p-4 text-center font-black text-green-700 bg-green-50">${passed.toLocaleString()}</td>
+                        <td class="p-4 col-manage">
+                            <div class="flex gap-1 justify-center">
+                                ${item.isEditing ? 
+                                    `<button onclick="saveEdit(${index})" class="bg-green-600 text-white px-2 py-0.5 rounded text-[10px]">Save</button>` : 
+                                    `<button onclick="toggleEdit(${index})" class="text-blue-600 border border-blue-200 px-2 py-0.5 rounded text-[10px]">Edit</button>`
+                                }
+                                <button onclick="deleteOperation(${index})" class="text-red-400 text-[10px]">DEL</button>
+                            </div>
                         </td>
-                    </tr>
-                `;
-
-                if (index === operations.length - 1) {
-                    document.getElementById('finalOutput').innerText = actualDone.toLocaleString();
-                    document.getElementById('totalOutputPcs').innerText = capHr + " Pcs./Hr.";
-                }
+                    </tr>`;
             });
 
-            // Summary Calculation
-            const pitchTime = totalSAM / totalOp;
-            const balance = (totalSAM / (maxCycleTime * totalOp)) * 100;
+            document.getElementById('finalOutput').innerText = stepResults.length > 0 ? stepResults[stepResults.length-1].passed.toLocaleString() : 0;
 
-            document.getElementById('sumSAM').innerText = totalSAM.toFixed(2);
-            document.getElementById('sumAMV').innerText = totalAMV.toFixed(2);
-            document.getElementById('sumOp').innerText = totalOp.toFixed(2);
-            document.getElementById('avgEff').innerText = ((totalSAM / totalAMV) * 100).toFixed(1) + "%";
-            document.getElementById('balance').innerText = balance.toFixed(1) + "%";
-            document.getElementById('pitchTime').innerText = pitchTime.toFixed(2);
-            document.getElementById('uclTime').innerText = (pitchTime * 1.05).toFixed(2);
-            document.getElementById('lclTime').innerText = (pitchTime * 0.95).toFixed(2);
-            document.getElementById('maxCycle').innerText = maxCycleTime.toFixed(2);
-
-            updateChart(labels, wipData, doneData);
+            // ส่งข้อมูลไปวาดกราฟ (รวม reqOutHr เพื่อใช้เป็นเส้น Takt Time ในหน่วย Pcs/Hr)
+            updateChart(labels, wipData, doneData, taktTime);
         }
 
-        function updateChart(labels, wipData, doneData) {
+        function updateChart(labels, wipData, doneData, taktTime) {
             const ctx = document.getElementById('lineChart').getContext('2d');
             if (myChart) myChart.destroy();
+
             myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'WIP (งานค้าง)', data: wipData, backgroundColor: '#f97316' },
-                        { label: 'Done (งานเสร็จ)', data: doneData, backgroundColor: '#15803d' }
+                        {
+                            label: 'WIP (งานค้าง)',
+                            data: wipData,
+                            backgroundColor: '#f97316',
+                            order: 2
+                        },
+                        {
+                            label: 'Done (งานเสร็จ)',
+                            data: doneData,
+                            backgroundColor: '#15803d',
+                            order: 2
+                        },
+                        {
+                            label: 'Takt Time',
+                            data: labels.map(() => taktTime),
+                            type: 'line',
+                            borderColor: '#eab308',
+                            fill: false,
+                            order: 1
+                        }
                     ]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    plugins: { legend: { position: 'bottom' } },
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Pieces (Pcs)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
             });
         }
@@ -287,7 +256,7 @@
             if (newVal >= 1) { input.value = newVal; simulate(); }
         }
 
-        simulate();
+        window.onload = simulate;
     </script>
 </body>
 </html>
