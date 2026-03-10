@@ -79,7 +79,7 @@
                         <th class="p-4 text-center">Operator</th>
                         <th class="p-4 text-center bg-blue-900">Cap/Hr</th>
                         <th class="p-4 text-center bg-orange-600">WIP</th>
-                        <th class="p-4 text-center bg-green-700">Done</th>
+                        <th class="p-4 text-center bg-green-700">Output</th>
                         <th class="p-4 text-center">Manage</th>
                     </tr>
                 </thead>
@@ -278,10 +278,10 @@
         const taktTime = (demand > 0) ? (7 * 3600 * days / demand) : 0;
         const reqOutHr = (demand > 0) ? (demand / (7 * days)) : 0;
 
-        document.getElementById('calcTaktTime').innerText = taktTime.toFixed(2);
-        document.getElementById('reqOutputHr').innerText = reqOutHr.toFixed(2);
+        document.getElementById('calcTaktTime').innerText = taktTime.toFixed(0);
+        document.getElementById('reqOutputHr').innerText = reqOutHr.toFixed(0);
 
-        const hours = parseInt(document.getElementById('simHours').value) || 1;
+          const hours = parseInt(document.getElementById('simHours').value) || 1;
         const tbody = document.getElementById('opTableBody');
         if (!tbody) return;
         
@@ -290,8 +290,8 @@
         let labels = [], wipData = [], capData = [], layoutInfo = [];
 
         let stepResults = operations.map(item => {
-            const capHr = Math.floor((3600 / item.amv) * item.op);
-            const cycleTime = item.amv / item.op;
+            const capHr = Math.floor((3600 / item.amv) * item.op); //คำนวณ Capacity ต่อชั่วโมง
+            const cycleTime = item.amv / item.op; //คำนวณ Cycle Time
             return { ...item, capHr, cycleTime };
         });
 
@@ -300,9 +300,11 @@
             let inputFromPrev = (index === 0) ? totalCap : stepResults[index-1].passed;
             let actualProcessed = Math.min(inputFromPrev, totalCap);
             let nextCap = (index === stepResults.length - 1) ? actualProcessed : (stepResults[index+1].capHr * hours);
-            
-            let wip = Math.max(0, actualProcessed - nextCap);
-            let passed = actualProcessed - wip;
+            let prevCapHr = (index === 0) ? item.capHr : stepResults[index-1].capHr;
+            let wip = actualProcessed - nextCap;
+            let passed = (index === 0) 
+    ? (item.capHr - wip) 
+    : actualProcessed;
 
             item.passed = passed;
             labels.push("Op " + item.id);
@@ -319,7 +321,7 @@
                     <td class="p-4 text-center font-bold text-blue-700 bg-blue-50">${((item.sam/item.amv)*100).toFixed(1)}%</td>
                     <td class="p-4 text-center">${item.isEditing ? `<input type="number" id="editOp-${index}" value="${item.op}" class="w-16 border rounded px-1">` : item.op}</td>
                     <td class="p-4 text-center font-bold text-blue-900">${item.capHr}</td>
-                    <td class="p-4 text-center font-black ${wip > 0 ? 'text-orange-600' : 'text-slate-300'}">${wip.toLocaleString()}</td>
+                    <td class="p-4 text-center font-black ${wip > 0 ? 'text-green-600' : 'text-red-600'}">${wip.toLocaleString()}</td>
                     <td class="p-4 text-center font-black text-green-700 bg-green-50">${passed.toLocaleString()}</td>
                     <td class="p-4">
                         <div class="flex gap-1 justify-center">
