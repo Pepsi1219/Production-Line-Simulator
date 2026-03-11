@@ -275,15 +275,16 @@ let operations = [
     const bottomRow = info.slice(mid).reverse();
 
     // สร้าง ID ให้แต่ละแถวเพื่อให้ Sortable มาเกาะได้
-    let topHtml = `<div id="layoutTopRow" class="flex justify-center items-end w-full gap-x-4">`;
-    topRow.forEach((s, i) => topHtml += createStationHtml(s, i));
-    topHtml += `</div>`;
+    let topHtml = `<div id="layoutTopRow" class="sortable-row flex justify-center items-end w-full gap-x-4 min-h-[120px]">`;
+topRow.forEach((s, i) => topHtml += createStationHtml(s, i));
+topHtml += `</div>`;
 
     const flowLine = `<div class="w-full flex items-center gap-2 px-4 opacity-50"><div class="h-[1px] flex-grow bg-slate-300"></div><div class="text-[9px] font-bold text-slate-400">FLOW</div><div class="h-[1px] flex-grow bg-slate-300"></div></div>`;
 
-    let botHtml = `<div id="layoutBotRow" class="flex justify-center items-end w-full gap-x-4">`;
-    bottomRow.forEach((s, i) => botHtml += createStationHtml(s, mid + (bottomRow.length - 1 - i)));
-    botHtml += `</div>`;
+    let botHtml = `<div id="layoutBotRow" class="sortable-row flex justify-center items-end w-full gap-x-4 min-h-[120px]">`;
+// ตรง index ของแถวล่าง ต้องระวังเรื่องลำดับเดิมของคุณด้วยนะครับ 
+bottomRow.forEach((s, i) => botHtml += createStationHtml(s, mid + (bottomRow.length - 1 - i)));
+botHtml += `</div>`;
 
     layoutDiv.innerHTML = topHtml + flowLine + botHtml;
 
@@ -294,32 +295,36 @@ let operations = [
 
 function initLayoutSortable() {
     const config = {
+        group: 'shared-layout', // ชื่อกลุ่มต้องเหมือนกันทั้งบนและล่าง
         animation: 150,
         draggable: ".drag-item-layout",
+        ghostClass: "opacity-25", // แสดงเงาขณะลาก
         onEnd: function (evt) {
-            // ดึงลำดับใหม่จาก DOM
+            // ฟังก์ชันดึงลำดับใหม่หลังจากลากสลับ (เหมือนเดิม)
             const newOrder = [];
+            
             // ดึงจากแถวบน
             document.querySelectorAll('#layoutTopRow .drag-item-layout').forEach(el => {
                 newOrder.push(parseInt(el.getAttribute('data-index')));
             });
-            // ดึงจากแถวล่าง (ต้อง reverse กลับเพราะตอนวาดเรา reverse แถวล่าง)
+            
+            // ดึงจากแถวล่าง (สำหรับแผนผังโรงงาน แถวล่างมักจะย้อนกลับ)
             const botItems = [];
             document.querySelectorAll('#layoutBotRow .drag-item-layout').forEach(el => {
                 botItems.push(parseInt(el.getAttribute('data-index')));
             });
+            // ถ้างผังของคุณออกแบบมาให้เดินเป็นตัว U แถวล่างต้อง .reverse() ก่อน push เข้า newOrder
             newOrder.push(...botItems.reverse());
 
-            // อัปเดต Array operations ตามลำดับใหม่
+            // อัปเดตข้อมูลกลางและรัน Simulation ใหม่
             const updatedOps = newOrder.map(idx => operations[idx]);
             operations = updatedOps;
-
-            // รันการจำลองใหม่เพื่ออัปเดตค่า WIP และกราฟ
-            simulate();
+            simulate(); 
         }
     };
 
     if (typeof Sortable !== 'undefined') {
+        // ประกาศใช้งานทั้งสองแถวด้วย Config เดียวกัน
         new Sortable(document.getElementById('layoutTopRow'), config);
         new Sortable(document.getElementById('layoutBotRow'), config);
     }
