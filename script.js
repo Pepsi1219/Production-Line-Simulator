@@ -201,7 +201,6 @@ let operations = [
     if (!layoutDiv) return;
     
     layoutDiv.innerHTML = '';
-    // ใช้ flex-wrap: nowrap และ items-center เพื่อให้ทุกอย่างอยู่ในบรรทัดเดียวและหดได้
     layoutDiv.className = "flex flex-col items-center w-full gap-y-8 p-6 bg-slate-50 rounded-3xl border border-slate-200 shadow-inner overflow-hidden"; 
 
     const workerColors = [
@@ -227,15 +226,8 @@ let operations = [
     '#FFD700'  // ทอง (ตัดกับน้ำเงิน)
 ];
 
-    // --- ส่วนที่ 1: คำนวณ Scale ตามจำนวนขั้นตอน ---
-    const totalSteps = info.length;
-    const mid = Math.ceil(totalSteps / 2);
-    
-    // ถ้าสถานีเยอะ (เช่น > 15 ต่อแถว) ให้หดขนาดลง
-    let scale = 1;
-    if (mid > 12) scale = 0.8;
-    if (mid > 18) scale = 0.6;
-    if (mid > 25) scale = 0.45;
+    const mid = Math.ceil(info.length / 2);
+    let scale = mid > 12 ? (mid > 18 ? 0.6 : 0.8) : 1;
 
     let currentWorkerIndex = 0;
     let currentWorkerLoad = 0;
@@ -244,24 +236,16 @@ let operations = [
         let html = '';
         let remainingOp = parseFloat(opValue);
         if (!remainingOp || remainingOp <= 0) return '';
-
         while (remainingOp > 0.001) {
             let canTake = Math.min(remainingOp, 1 - currentWorkerLoad);
             let percent = (canTake / 1) * 100; 
             const color = workerColors[currentWorkerIndex % workerColors.length];
-            
-            // ปรับขนาดไอคอนตาม scale
-            const iconSize = 20 * scale; 
-            
+            const iconSize = 18 * scale; 
             html += `
-                <div class="relative group flex items-center justify-center" style="width: ${12 * scale}px; height: ${28 * scale}px;">
+                <div class="relative group flex items-center justify-center" style="width: ${22 * scale}px; height: ${28 * scale}px;">
                     <i class="fas fa-user text-slate-200 absolute opacity-40" style="font-size: ${iconSize}px;"></i>
                     <i class="fas fa-user absolute" style="color: ${color}; clip-path: inset(${100 - percent}% 0 0 0); font-size: ${iconSize}px;"></i>
-                    <span class="absolute -top-6 scale-0 group-hover:scale-100 bg-black text-white text-[8px] px-1 rounded transition-all whitespace-nowrap z-50">
-                        W${currentWorkerIndex + 1}
-                    </span>
                 </div>`;
-
             currentWorkerLoad += canTake;
             remainingOp -= canTake;
             if (currentWorkerLoad >= 0.99) { currentWorkerIndex++; currentWorkerLoad = 0; }
@@ -269,53 +253,79 @@ let operations = [
         return html;
     };
 
-    const createStationHtml = (s) => {
+    const createStationHtml = (s, originalIndex) => {
         const bgColor = s.isBottleneck ? 'bg-red-500' : 'bg-indigo-600';
-        // ปรับขนาดกล่องสถานีตาม scale
-        const boxSize = 64 * scale;
-        const fontSize = 10 * scale;
-
         return `
-            <div class="flex flex-col items-center flex-shrink" style="min-width: 0;">
+            <div class="flex flex-col items-center cursor-move drag-item-layout" data-index="${originalIndex}">
                 <div class="flex justify-center gap-1 mb-2" style="min-height: ${30 * scale}px;">
                     ${getWorkerIconsHtml(s.op)}
                 </div>
                 <div class="${bgColor} rounded-xl text-white flex flex-col items-center justify-center shadow-lg border-2 border-white relative transition-all"
-                     style="width: ${boxSize}px; height: ${boxSize}px;">
-                    <span style="font-size: ${fontSize}px; font-weight: bold;">Op ${s.id}</span>
+                     style="width: ${64 * scale}px; height: ${64 * scale}px;">
+                    <span style="font-size: ${10 * scale}px; font-weight: bold;">Op ${s.id}</span>
                     <div class="absolute -bottom-2 bg-white text-slate-700 px-1.5 py-0.5 rounded-full shadow-sm border border-slate-200"
                          style="font-size: ${8 * scale}px; font-weight: 900;">
                         ${s.op}
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
     };
 
-    // --- ส่วนที่ 2: จัดแถวให้หดตัวอัตโนมัติ (Flex-1) ---
     const topRow = info.slice(0, mid);
     const bottomRow = info.slice(mid).reverse();
 
-    // ใช้ w-full และ justify-center เพื่อให้มันหดอยู่ในกรอบ
-    let topHtml = `<div class="flex justify-center items-end w-full gap-x-${mid > 15 ? '1' : '4'}">`;
-    topRow.forEach(s => topHtml += createStationHtml(s));
+    // สร้าง ID ให้แต่ละแถวเพื่อให้ Sortable มาเกาะได้
+    let topHtml = `<div id="layoutTopRow" class="flex justify-center items-end w-full gap-x-4">`;
+    topRow.forEach((s, i) => topHtml += createStationHtml(s, i));
     topHtml += `</div>`;
 
-    const flowLine = `
-        <div class="w-full flex items-center gap-2 px-4">
-            <div class="h-[1px] flex-grow bg-slate-300"></div>
-            <div class="text-slate-400 font-bold uppercase" style="font-size: ${9 * scale}px; letter-spacing: 2px;">Flow</div>
-            <div class="h-[1px] flex-grow bg-slate-300"></div>
-        </div>
-    `;
+    const flowLine = `<div class="w-full flex items-center gap-2 px-4 opacity-50"><div class="h-[1px] flex-grow bg-slate-300"></div><div class="text-[9px] font-bold text-slate-400">FLOW</div><div class="h-[1px] flex-grow bg-slate-300"></div></div>`;
 
-    let botHtml = `<div class="flex justify-center items-end w-full gap-x-${mid > 15 ? '1' : '4'}">`;
-    bottomRow.forEach(s => botHtml += createStationHtml(s));
+    let botHtml = `<div id="layoutBotRow" class="flex justify-center items-end w-full gap-x-4">`;
+    bottomRow.forEach((s, i) => botHtml += createStationHtml(s, mid + (bottomRow.length - 1 - i)));
     botHtml += `</div>`;
 
     layoutDiv.innerHTML = topHtml + flowLine + botHtml;
+
+    // เรียกฟังก์ชันเปิดการลากวาง
+    initLayoutSortable();
 }
-    
+
+
+function initLayoutSortable() {
+    const config = {
+        animation: 150,
+        draggable: ".drag-item-layout",
+        onEnd: function (evt) {
+            // ดึงลำดับใหม่จาก DOM
+            const newOrder = [];
+            // ดึงจากแถวบน
+            document.querySelectorAll('#layoutTopRow .drag-item-layout').forEach(el => {
+                newOrder.push(parseInt(el.getAttribute('data-index')));
+            });
+            // ดึงจากแถวล่าง (ต้อง reverse กลับเพราะตอนวาดเรา reverse แถวล่าง)
+            const botItems = [];
+            document.querySelectorAll('#layoutBotRow .drag-item-layout').forEach(el => {
+                botItems.push(parseInt(el.getAttribute('data-index')));
+            });
+            newOrder.push(...botItems.reverse());
+
+            // อัปเดต Array operations ตามลำดับใหม่
+            const updatedOps = newOrder.map(idx => operations[idx]);
+            operations = updatedOps;
+
+            // รันการจำลองใหม่เพื่ออัปเดตค่า WIP และกราฟ
+            simulate();
+        }
+    };
+
+    if (typeof Sortable !== 'undefined') {
+        new Sortable(document.getElementById('layoutTopRow'), config);
+        new Sortable(document.getElementById('layoutBotRow'), config);
+    }
+}
+
+
 
     function updateChart(labels, wipData, capData, target) {
         const canvas = document.getElementById('lineChart');
