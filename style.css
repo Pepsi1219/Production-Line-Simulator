@@ -1,0 +1,86 @@
+.edit-input { 
+    width: 100%; 
+    padding: 4px; 
+    border: 1px solid #3b82f6; 
+    border-radius: 4px; 
+    text-align: center; 
+    font-size: 10px; 
+}
+
+.drag-handle { 
+    cursor: grab; 
+    color: #94a3b8; 
+}
+
+.drag-handle:active { 
+    cursor: grabbing; 
+}
+
+.ghost { 
+    opacity: 0.4; 
+    background: #e2e8f0; 
+}
+
+/* Layout Station Style */
+.station { 
+    transition: all 0.3s ease; 
+    position: relative; 
+}
+
+.arrow-right::after { 
+    content: '→'; 
+    position: absolute; 
+    right: -15px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #cbd5e1; 
+}
+
+.arrow-left::before { 
+    content: '←'; 
+    position: absolute; 
+    left: -15px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #cbd5e1; 
+}
+/* style.css */
+.station {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    min-width: 60px; /* ขยายขนาดเพื่อให้เห็นรูปคนชัดขึ้น */
+    min-height: 60px;
+}
+
+/* เอฟเฟกต์เงาสำหรับสถานีที่เป็น Bottleneck */
+.is-bottleneck {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* สไตล์สำหรับไอคอนคน */
+.worker-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%; /* หัว */
+    position: relative;
+    margin: 2px;
+}
+
+/* วาดส่วนตัวพนักงาน */
+.worker-icon::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 10px;
+    background: inherit; /* ใช้สีเดียวกับหัว */
+    border-radius: 4px 4px 2px 2px;
+}
