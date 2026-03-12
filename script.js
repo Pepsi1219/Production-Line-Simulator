@@ -202,6 +202,8 @@ let operations = [
     setSafeText('lclTime', currentMetrics.lcl.toFixed(1));
     setSafeText('maxCycle', maxCycleTime.toFixed(1));
     setSafeText('totalOutputPcs', lineOutputHr.toFixed(0));
+    setSafeText('calcTaktTime', taktTime.toFixed(0));
+    setSafeText('reqOutputHr', reqOutHr.toFixed(0));
 
     // 6. เรียกฟังก์ชันแสดงผลกราฟและแผนผังโรงงาน
     if (typeof updateChart === 'function') {
