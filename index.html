@@ -16,14 +16,14 @@
         <h1 class="text-3xl font-extrabold mb-6 text-slate-800 border-b pb-4 flex justify-between items-center">
             <div>Production Simulator </div>
             <div class="text-sm font-normal text-slate-500 italic">
-    Version 1.0.2
+    Version 1.0.2.1
     <div class="text-[10px] text-slate-400">Last updated Mar 12, 2026</div>
 </div>
         </h1>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-800 p-6 rounded-xl text-white shadow-lg">
             <div>
-                <label class="block text-xs uppercase text-slate-400 mb-1">ยอดคำสั่งผลิต (Production Order)</label>
+                <label class="block text-xs uppercase text-slate-400 mb-1">ยอดคำสั่งผลิต (Order)</label>
                 <input type="number" id="targetDemand" value="600" oninput="simulate()" class="w-full p-2 bg-slate-700 border border-slate-600 rounded font-bold text-xl outline-none focus:ring-2 ring-blue-500">
             </div>
             <div>
@@ -72,10 +72,11 @@
                         <th class="p-4">Process.</th>
                         <th class="p-4 text-center">SAM</th>
                         <th class="p-4 text-center">AMV</th>
-                        <th class="p-4 text-center bg-blue-700">Eff (%)</th>
+                        <th class="p-4 text-center">Eff (%)</th>
                         <th class="p-4 text-center">Work laod</th>
-                        <th class="p-4 text-center bg-blue-900">Cap/Hr</th>
-                        <th class="p-4 text-center bg-orange-600">WIP</th>
+                        <th class="p-4 text-center">CT</th>
+                        <th class="p-4 text-center">Cap/Hr</th>
+                        <th class="p-4 text-center">WIP</th>
                         <th class="p-4 text-center bg-green-700">Output</th>
                         <th class="p-4 text-center">Operator</th>
                         <th class="p-4 text-center">Manage</th>
@@ -88,12 +89,18 @@
 
         <div class="grid grid-cols-1 gap-6">
     
-    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
-        <h2 class="text-lg font-bold mb-4 text-slate-700 uppercase">WIP & Flow Visualization</h2>
-        <div class="h-80">
-            <canvas id="lineChart"></canvas>
-        </div>
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-slate-700 uppercase">WIP & Flow Visualization</h2>
+        <button onclick="toggleChartMode()" id="chartToggleButton" 
+            class="text-xs font-bold px-4 py-2 bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-600 rounded-lg transition-all border border-slate-200">
+            Show Actual Output
+        </button>
     </div>
+    <div class="h-[300px] relative">
+        <canvas id="lineChart"></canvas>
+    </div>
+</div>
 
     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
     <h2 class="text-lg font-bold mb-4 text-slate-700 uppercase">Production Layout</h2>
