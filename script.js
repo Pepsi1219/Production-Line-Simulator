@@ -1,26 +1,26 @@
 let operations = [
-    { id: "1", sam: 19.62, amv: 19.62, op: 0.6, isEditing: false },
-    { id: "2", sam: 12.34, amv: 12.34, op: 0.3, isEditing: false },
-    { id: "3", sam: 13.83, amv: 13.83, op: 0.3, isEditing: false },
-    { id: "4", sam: 24.53, amv: 24.53, op: 0.6, isEditing: false },
-    { id: "5", sam: 22.43, amv: 22.43, op: 0.6, isEditing: false },
-    { id: "6", sam: 32.47, amv: 32.47, op: 0.9, isEditing: false },
-    { id: "7", sam: 21.44, amv: 21.44, op: 0.6, isEditing: false },
+    { id: "1", sam: 19.62, amv: 29.62, op: 0.6, isEditing: false },
+    { id: "2", sam: 12.34, amv: 17.34, op: 0.3, isEditing: false },
+    { id: "3", sam: 13.83, amv: 20.83, op: 0.3, isEditing: false },
+    { id: "4", sam: 24.53, amv: 34.53, op: 0.6, isEditing: false },
+    { id: "5", sam: 22.43, amv: 27.43, op: 0.6, isEditing: false },
+    { id: "6", sam: 32.47, amv: 35.47, op: 0.9, isEditing: false },
+    { id: "7", sam: 21.44, amv: 29.44, op: 0.6, isEditing: false },
     { id: "8", sam: 82.79, amv: 103.49, op: 2.7, isEditing: false },
     { id: "9", sam: 48.41, amv: 48.41, op: 1.6, isEditing: false },
-    { id: "10", sam: 26.80, amv: 26.80, op: 0.9, isEditing: false },
-    { id: "11", sam: 13.13, amv: 13.13, op: 0.4, isEditing: false },
+    { id: "10", sam: 26.80, amv: 29.80, op: 0.9, isEditing: false },
+    { id: "11", sam: 13.13, amv: 16.13, op: 0.4, isEditing: false },
     { id: "12", sam: 42.16, amv: 49.60, op: 1.5, isEditing: false },
-    { id: "13", sam: 27.88, amv: 27.88, op: 0.5, isEditing: false },
+    { id: "13", sam: 27.88, amv: 35.88, op: 0.5, isEditing: false },
     { id: "14", sam: 31.45, amv: 37.00, op: 1.0, isEditing: false },
-    { id: "15", sam: 55.34, amv: 55.34, op: 1.5, isEditing: false },
-    { id: "16", sam: 16.00, amv: 16.00, op: 0.5, isEditing: false },
-    { id: "17", sam: 57.01, amv: 57.01, op: 1.5, isEditing: false },
-    { id: "18", sam: 27.64, amv: 29.64, op: 1.0, isEditing: false },
-    { id: "19", sam: 23.21, amv: 23.21, op: 0.5, isEditing: false },
-    { id: "20", sam: 24.29, amv: 24.29, op: 0.5, isEditing: false },
-    { id: "21", sam: 29.16, amv: 29.16, op: 0.8, isEditing: false },
-    { id: "22", sam: 40.09, amv: 40.09, op: 0.7, isEditing: false }
+    { id: "15", sam: 55.34, amv: 72.00, op: 1.5, isEditing: false },
+    { id: "16", sam: 16.00, amv: 32.00, op: 0.5, isEditing: false },
+    { id: "17", sam: 57.01, amv: 77.00, op: 1.5, isEditing: false },
+    { id: "18", sam: 27.64, amv: 48.00, op: 1.0, isEditing: false },
+    { id: "19", sam: 23.21, amv: 43.00, op: 0.5, isEditing: false },
+    { id: "20", sam: 24.29, amv: 34.29, op: 0.5, isEditing: false },
+    { id: "21", sam: 29.16, amv: 42.00, op: 0.8, isEditing: false },
+    { id: "22", sam: 40.09, amv: 58.00, op: 0.7, isEditing: false }
 ];
 
     let myChart = null; // ประกาศแค่ครั้งเดียวที่ส่วนหัวของสคริปต์
@@ -79,6 +79,8 @@ let operations = [
     // 4. Core Logic
     function simulate() {
     // 1. ดึงค่าเริ่มต้นจาก Input ของระบบ
+    const allCycleTimes = operations.map(item => item.amv / item.op);
+    const maxCycleValue = Math.max(...allCycleTimes);
     const demand = parseFloat(document.getElementById('targetDemand')?.value) || 0;
     const days = parseFloat(document.getElementById('targetDays')?.value) || 1;
     const taktTime = (demand > 0) ? (7 * 3600 * days / demand) : 0;
@@ -87,8 +89,8 @@ let operations = [
 
     // Helper Function สำหรับอัปเดต UI ที่อาจจะยังเหลืออยู่ (แบบปลอดภัย)
     const setSafeText = (id, value) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = value;
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
     };
 
     const tbody = document.getElementById('opTableBody');
@@ -96,7 +98,7 @@ let operations = [
     tbody.innerHTML = '';
 
     // 2. เตรียมตัวแปรสำหรับเก็บผลลัพธ์
-    let labels = [], wipData = [], capData = [], layoutInfo = [];
+    let labels = [], wipData = [], capData = [], outputData = [], layoutInfo = [];
     let totalSAM = 0, totalAMV = 0, totalOp = 0, maxCycleTime = 0;
 
     // คำนวณเบื้องต้นของแต่ละขั้นตอน
@@ -108,20 +110,27 @@ let operations = [
 
     // 3. คำนวณ WIP และ Flow การผลิต (Process Logic)
     stepResults.forEach((item, index) => {
+        const isBottleneck = item.cycleTime.toFixed(2) === maxCycleValue.toFixed(2);
+        
+      
         const totalCap = item.capHr * hours;
         let inputFromPrev = (index === 0) ? totalCap : stepResults[index - 1].passed;
         let actualProcessed = Math.min(inputFromPrev, totalCap);
         let nextCap = (index === stepResults.length - 1) ? actualProcessed : (stepResults[index + 1].capHr * hours);
         
         let wip = actualProcessed - nextCap;
-        let passed = (index === 0) ? (item.capHr - wip) : actualProcessed;
+        let passed = (index > 0) ? Math.min(actualProcessed, item.capHr) : actualProcessed;
 
         item.passed = passed;
+        
+        
         
         // เก็บข้อมูลสำหรับกราฟ
         labels.push("Op " + item.id);
         wipData.push(wip);
         capData.push(item.capHr);
+        outputData.push(passed);
+        
 
         // เก็บข้อมูลสำหรับส่งให้ Production Layout
         layoutInfo.push({ 
@@ -146,14 +155,24 @@ let operations = [
                 <td class="p-2 font-bold text-slate-700 text-center">${item.id}</td>
                 <td class="p-2">${item.process}</td>
                 <td class="p-2 text-center font-mono">${item.isEditing ? `<input type="number" id="editSAM-${index}" value="${item.sam}" class="w-12 border rounded px-1">` : item.sam.toFixed(2)}</td>
+                
                 <td class="p-2 text-center font-mono">${item.isEditing ? `<input type="number" id="editAMV-${index}" value="${item.amv}" class="w-12 border rounded px-1">` : item.amv.toFixed(2)}</td>
+                
                 <td class="p-2 text-center font-bold ${((item.sam/item.amv)*100) >= 75 ? 'text-green-600' : 'text-red-600'}">
                     ${((item.sam/item.amv)*100).toFixed(0)}%
                 </td>
+                
                 <td class="p-2 text-center font-semibold text-indigo-600">${item.isEditing ? `<input type="number" id="editOp-${index}" value="${item.op}" class="w-12 border rounded px-1">` : item.op}</td>
+
+                <td class="p-2 text-center font-bold ${isBottleneck ? 'text-red-600 bg-red-50' : ''}">
+                ${item.cycleTime.toFixed(1)}
+            </td>
+                
                 <td class="p-2 text-center font-bold text-slate-700">${item.capHr}</td>
+                
                 <td class="p-2 text-center font-black ${wip > 0 ? 'text-orange-500' : 'text-slate-300'}">${wip.toLocaleString()}</td>
                 <td class="p-2 text-center font-black text-green-700 bg-green-50/50">${passed.toLocaleString()}</td>
+                
                 <td class="p-2 text-center text-slate-500 italic">${item.operator || '-'}</td>
                 
                 <td class="p-2">
@@ -168,12 +187,13 @@ let operations = [
             </tr>`;
     });
 
-    // 4. คำนวณตัวชี้วัดประสิทธิภาพ (KPIs)
+    // 4. คำนวณตัวชี้วัดประสิทธิภาพ
     const pitchTime = totalOp > 0 ? (totalSAM / totalOp) : 0;
     const balance = (maxCycleTime > 0 && totalOp > 0) 
                     ? (totalSAM / (maxCycleTime * totalOp)) * 100 
                     : 0;
     const lineOutputHr = maxCycleTime > 0 ? Math.floor(3600 / maxCycleTime) : 0;
+      
 
     // 5. รวบรวมข้อมูลทั้งหมดส่งไปยังส่วนต่างๆ
     const currentMetrics = {
@@ -213,6 +233,9 @@ let operations = [
     if (typeof updateLayout === 'function') {
         updateLayout(layoutInfo, currentMetrics); 
     }
+    if (typeof updateChart === 'function') {
+    updateChart(labels, wipData, capData, reqOutHr, outputData); 
+}
 }
 
     // Visual Layout
@@ -474,72 +497,97 @@ function initLayoutSortable() {
 }
 
 
+let showOutputInsteadOfCap = false;
+    function updateChart(labels, wipData, capData, target, outputData = []) {
+    const canvas = document.getElementById('lineChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
 
-    function updateChart(labels, wipData, capData, target) {
-        const canvas = document.getElementById('lineChart');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+    if (myChart) { myChart.destroy(); }
 
-        if (myChart) { myChart.destroy(); }
+    const maxWip = Math.max(...wipData);
+    const bottleneckIndex = wipData.indexOf(maxWip);
 
-        const maxWip = Math.max(...wipData);
-        const bottleneckIndex = wipData.indexOf(maxWip);
+    // เลือกว่าจะแสดงข้อมูลชุดไหนระหว่าง Capacity หรือ Output
+    const secondaryData = showOutputInsteadOfCap ? outputData : capData;
+    const secondaryLabel = showOutputInsteadOfCap ? 'Actual Output' : 'Capacity';
+    const secondaryColor = showOutputInsteadOfCap ? '#0ea5e9' : '#15803d'; // สีฟ้าสำหรับ Output, เขียวสำหรับ Cap
 
-        myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'WIP',
-                        data: wipData,
-                        backgroundColor: wipData.map((wip, i) => (wip > capData[i]) ? '#dc2626' : '#f97316'),
-                        borderRadius: 4,
-                        order: 2
-                    },
-                    {
-                        label: 'Capacity',
-                        data: capData,
-                        backgroundColor: capData.map((_, i) => (maxWip > 0 && i === bottleneckIndex) ? '#065f46' : '#15803d'),
-                        borderRadius: 4,
-                        order: 2
-                    },
-                    {
-                        label: 'Takt time',
-                        data: labels.map(() => target),
-                        type: 'line',
-                        borderColor: '#1e40af',
-                        borderWidth: 1,
-                        borderDash: [8, 5],
-                        pointRadius: 0,
-                        fill: false,
-                        order: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            afterBody: function(context) {
-                                const i = context[0].dataIndex;
-                                if (wipData[i] > capData[i]) return "⚠ สถานะ: Over Capacity";
-                                if (i === bottleneckIndex && wipData[i] > 0) return "🚨 สถานะ: Bottleneck";
-                                return "✔ สถานะ: Normal Flow";
-                            }
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'WIP',
+                    data: wipData,
+                    backgroundColor: wipData.map((wip, i) => (wip > capData[i]) ? '#dc2626' : '#f97316'),
+                    borderRadius: 4,
+                    order: 2
+                },
+                {
+                    label: secondaryLabel, // เปลี่ยนชื่อตามปุ่มที่กด
+                    data: secondaryData,   // เปลี่ยนข้อมูลตามปุ่มที่กด
+                    backgroundColor: secondaryColor,
+                    borderRadius: 4,
+                    order: 2
+                },
+                {
+                    label: 'Target Output',
+                    data: labels.map(() => target),
+                    type: 'line',
+                    borderColor: '#1e40af',
+                    borderWidth: 1.5,
+                    borderDash: [8, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        afterBody: function(context) {
+                            const i = context[0].dataIndex;
+                            let status = "";
+                            if (wipData[i] > capData[i]) status += "⚠ Over Capacity\n";
+                            if (i === bottleneckIndex && wipData[i] > 0) status += "🚨 Bottleneck\n";
+                            if (outputData[i] < target) status += "📉 Below Target";
+                            return status || "✔ Normal Flow";
                         }
                     }
-                },
-                scales: {
-                    y: { beginAtZero: true },
-                    x: { grid: { display: false } }
                 }
+            },
+            scales: {
+                y: { beginAtZero: true },
+                x: { grid: { display: false } }
             }
-        });
+        }
+    });
+}
+
+    function toggleChartMode() {
+    showOutputInsteadOfCap = !showOutputInsteadOfCap; // สลับค่า true/false
+    
+    const btn = document.getElementById('chartToggleButton');
+    if (showOutputInsteadOfCap) {
+        btn.innerText = "Show Capacity";
+        btn.classList.add('bg-indigo-600', 'text-white');
+    } else {
+        btn.innerText = "Show Actual Output";
+        btn.classList.remove('bg-indigo-600', 'text-white');
     }
+    
+    // เรียก simulate ใหม่เพื่ออัปเดตกราฟด้วยข้อมูลล่าสุด
+    simulate(); 
+}
+
+
 
     function changeHour(val) {
         let input = document.getElementById('simHours');
