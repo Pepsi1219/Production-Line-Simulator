@@ -240,11 +240,8 @@ let operations = [
 
     // Visual Layout
     function updateLayout(info, metricsData = {}) {
-    // --- ส่วนที่ปรับปรุง: วาด Quick Dashboard จากข้อมูลที่รับเข้ามาโดยตรง ---
-    const summaryHeader = document.getElementById('layoutSummaryHeader');
-    
+    const summaryHeader = document.getElementById('layoutSummaryHeader');   
     if (summaryHeader) {
-        // ดึงค่าจาก metricsData (ถ้าไม่มีค่าให้ใช้ Default เป็น 0)
         const {
             totalSAM = 0,
             totalAMV = 0,
@@ -260,7 +257,7 @@ let operations = [
             targetHr = 0
         } = metricsData;
 
-        // กำหนดเงื่อนไขสีตาม Logic ที่คุณต้องการ
+        // กำหนดเงื่อนไขสีตาม
         const metrics = [
             { 
                 label: 'Total SAM', 
@@ -324,13 +321,13 @@ let operations = [
         `).join('');
     }
 
-    // --- ส่วนการวาดแผนผังโรงงาน (Factory Layout) ---
+    // --- ส่วนการวาดแผนผัง (Layout) ---
     const layoutDiv = document.getElementById('factoryLayout');
     if (!layoutDiv) return;
     
     layoutDiv.innerHTML = '';
-    // Container หลัก พร้อมสไตล์ที่คุณกำหนด
-    layoutDiv.className = "flex flex-col items-center w-full gap-y-8 p-6 bg-slate-50 rounded-3xl border border-slate-200 shadow-inner overflow-hidden";
+    // Container
+    layoutDiv.className = "flex flex-col items-center w-full gap-y-4 p-16 bg-slate-50 rounded-3xl border border-slate-200 shadow-inner overflow-auto";
 
     const workerColors = [
         '#FF1493', '#7CFC00', '#1E90FF', '#FF6347', '#32CD32', 
@@ -399,7 +396,7 @@ let operations = [
 
     // --- ส่วนที่ 3: ฟังก์ชันวาดแต่ละสถานี (Station Box) ---
     const createStationHtml = (s, actualIndex, isBottomRow) => {
-    const bgColor = s.isBottleneck ? 'bg-red-500' : 'bg-indigo-600';
+    const bgColor = s.isBottleneck ? 'bg-red-300' : 'bg-indigo-600';
     const boxSize = 50 * scale;
     
     return `
@@ -427,7 +424,7 @@ let operations = [
 
     // --- ส่วนที่ 4: ประกอบ Layout แถวบนและล่าง ---
     // แถวบน (Flow: ซ้ายไปขวา)
-    let topHtml = `<div id="layoutTopRow" class="sortable-row flex justify-center items-end w-full gap-x-4 min-h-[120px]">`;
+    let topHtml = `<div id="layoutTopRow" class="sortable-row flex justify-center items-end w-full gap-x-4 min-h-[10px]">`;
     for (let i = 0; i < mid; i++) {
         topHtml += createStationHtml(info[i], i, false);
     }
@@ -435,7 +432,7 @@ let operations = [
 
     // เส้น Flow ตรงกลาง
     const flowLine = `
-        <div class="w-full flex items-center gap-2 px-4 opacity-50">
+        <div class="w-full flex items-center gap-2 px-4 opacity-20">
             <div class="h-[1px] flex-grow bg-slate-300"></div>
             <div class="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Production Flow</div>
             <div class="h-[1px] flex-grow bg-slate-300"></div>
@@ -456,17 +453,18 @@ let operations = [
     if (typeof initLayoutSortable === 'function') {
         initLayoutSortable();
     }
+    
 }
 
 
 function initLayoutSortable() {
     const config = {
         group: 'shared-layout', // ชื่อกลุ่มต้องเหมือนกันทั้งบนและล่าง
-        animation: 150,
+        animation: 550,
         draggable: ".drag-item-layout",
-        ghostClass: "opacity-25", // แสดงเงาขณะลาก
+        ghostClass: "opacity-25", // เงาขณะลาก
         onEnd: function (evt) {
-            // ฟังก์ชันดึงลำดับใหม่หลังจากลากสลับ (เหมือนเดิม)
+            // ฟังก์ชันดึงลำดับใหม่หลังจากลากสลับ
             const newOrder = [];
             
             // ดึงจากแถวบน
@@ -474,12 +472,12 @@ function initLayoutSortable() {
                 newOrder.push(parseInt(el.getAttribute('data-index')));
             });
             
-            // ดึงจากแถวล่าง (สำหรับแผนผังโรงงาน แถวล่างมักจะย้อนกลับ)
+            // ดึงจากแถวล่าง
             const botItems = [];
             document.querySelectorAll('#layoutBotRow .drag-item-layout').forEach(el => {
                 botItems.push(parseInt(el.getAttribute('data-index')));
             });
-            // ถ้างผังของคุณออกแบบมาให้เดินเป็นตัว U แถวล่างต้อง .reverse() ก่อน push เข้า newOrder
+            // แถวล่างต้อง .reverse() ก่อน push เข้า newOrder
             newOrder.push(...botItems.reverse());
 
             // อัปเดตข้อมูลกลางและรัน Simulation ใหม่
@@ -577,7 +575,7 @@ let showOutputInsteadOfCap = false;
     const btn = document.getElementById('chartToggleButton');
     if (showOutputInsteadOfCap) {
         btn.innerText = "Show Capacity";
-        btn.classList.add('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-indigo-600', 'text-black');
     } else {
         btn.innerText = "Show Actual Output";
         btn.classList.remove('bg-indigo-600', 'text-white');
