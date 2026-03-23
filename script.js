@@ -1,26 +1,28 @@
 let operations = [
-    { id: "1", sam: 19.62, amv: 29.62, op: 0.6, isEditing: false },
-    { id: "2", sam: 12.34, amv: 17.34, op: 0.3, isEditing: false },
-    { id: "3", sam: 13.83, amv: 20.83, op: 0.3, isEditing: false },
-    { id: "4", sam: 24.53, amv: 34.53, op: 0.6, isEditing: false },
-    { id: "5", sam: 22.43, amv: 27.43, op: 0.6, isEditing: false },
-    { id: "6", sam: 32.47, amv: 35.47, op: 0.9, isEditing: false },
-    { id: "7", sam: 21.44, amv: 29.44, op: 0.6, isEditing: false },
-    { id: "8", sam: 82.79, amv: 103.49, op: 2.7, isEditing: false },
-    { id: "9", sam: 48.41, amv: 48.41, op: 1.6, isEditing: false },
-    { id: "10", sam: 26.80, amv: 29.80, op: 0.9, isEditing: false },
-    { id: "11", sam: 13.13, amv: 16.13, op: 0.4, isEditing: false },
-    { id: "12", sam: 42.16, amv: 49.60, op: 1.5, isEditing: false },
-    { id: "13", sam: 27.88, amv: 35.88, op: 0.5, isEditing: false },
-    { id: "14", sam: 31.45, amv: 37.00, op: 1.0, isEditing: false },
-    { id: "15", sam: 55.34, amv: 72.00, op: 1.5, isEditing: false },
-    { id: "16", sam: 16.00, amv: 32.00, op: 0.5, isEditing: false },
-    { id: "17", sam: 57.01, amv: 77.00, op: 1.5, isEditing: false },
-    { id: "18", sam: 27.64, amv: 48.00, op: 1.0, isEditing: false },
-    { id: "19", sam: 23.21, amv: 43.00, op: 0.5, isEditing: false },
-    { id: "20", sam: 24.29, amv: 34.29, op: 0.5, isEditing: false },
-    { id: "21", sam: 29.16, amv: 42.00, op: 0.8, isEditing: false },
-    { id: "22", sam: 40.09, amv: 58.00, op: 0.7, isEditing: false }
+    { id: "1", sam: 18.37, amv: 21.31, op: 0.5, isEditing: false },
+    { id: "2", sam: 38.43, amv: 43.43, op: 0.5, isEditing: false },
+    { id: "3", sam: 34.84, amv: 39.84, op: 0.5, isEditing: false },
+    { id: "4", sam: 25.47, amv: 27.23, op: 0.5, isEditing: false },
+    { id: "5", sam: 7.64, amv: 14.14, op: 0.5, isEditing: false },
+    { id: "6", sam: 13.69, amv: 27.69, op: 0.5, isEditing: false },
+    { id: "7", sam: 16.77, amv: 21.33, op: 0.5, isEditing: false },
+    { id: "8", sam: 33.50, amv: 37.22, op: 0.5, isEditing: false },
+    { id: "9", sam: 23.83, amv: 34.34, op: 0.5, isEditing: false },
+    { id: "10", sam: 22.60, amv: 23.00, op: 0.5, isEditing: false },
+    { id: "11", sam: 31.48, amv: 40.48, op: 0.5, isEditing: false },
+    { id: "12", sam: 22.06, amv: 25.00, op: 0.5, isEditing: false },
+    { id: "13", sam: 17.12, amv: 19.12, op: 0.5, isEditing: false },
+    { id: "14", sam: 13.87, amv: 18.00, op: 0.5, isEditing: false },
+    { id: "15", sam: 83.41, amv: 98.00, op: 0.5, isEditing: false },
+    { id: "16", sam: 47.35, amv: 55.00, op: 0.5, isEditing: false },
+    { id: "17", sam: 33.14, amv: 45.00, op: 0.5, isEditing: false },
+    { id: "18", sam: 13.69, amv: 19.00, op: 0.5, isEditing: false },
+    { id: "19", sam: 23.33, amv: 27.33, op: 0.5, isEditing: false },
+    { id: "20", sam: 40.28, amv: 48.28, op: 0.5, isEditing: false },
+    { id: "21", sam: 41.75, amv: 46.75, op: 0.5, isEditing: false },
+    { id: "22", sam: 35.29, amv: 39.29, op: 0.5, isEditing: false },
+    { id: "23", sam: 39.38, amv: 51.38, op: 0.5, isEditing: false },
+    { id: "24", sam: 39.76, amv: 49.76, op: 0.5, isEditing: false }
 ];
 
     let myChart = null; // ประกาศแค่ครั้งเดียวที่ส่วนหัวของสคริปต์
@@ -78,48 +80,48 @@ let operations = [
 
     // 4. Core Logic
     function simulate() {
-    // 1. ดึงค่าเริ่มต้นจาก Input ของระบบ
-    const allCycleTimes = operations.map(item => item.amv / item.op);
-    const maxCycleValue = Math.max(...allCycleTimes);
-    const demand = parseFloat(document.getElementById('targetDemand')?.value) || 0;
-    const days = parseFloat(document.getElementById('targetDays')?.value) || 1;
-    const taktTime = (demand > 0) ? (7 * 3600 * days / demand) : 0;
-    const reqOutHr = (demand > 0) ? (demand / (7 * days)) : 0;
-    const hours = parseInt(document.getElementById('simHours')?.value) || 1;
+    // กลุ่มค่าจาก Input (ดึงจาก DOM)
+    const demand = parseFloat(document.getElementById('targetDemand')?.value) || 0; // ความต้องการของลูกค้า (ชิ้น)
+    const days = parseFloat(document.getElementById('targetDays')?.value) || 1; // จำนวนวันที่ใช้ในการผลิต
+    const packsize = parseFloat(document.getElementById('packSize')?.value) || 1; // จำนวนบรรจุ
+    const hours = parseInt(document.getElementById('simHours')?.value) || 1; // จำนวนชั่วโมงที่ต้องการจำลอง
 
-    // Helper Function สำหรับอัปเดต UI ที่อาจจะยังเหลืออยู่ (แบบปลอดภัย)
-    const setSafeText = (id, value) => {
-    const el = document.getElementById(id);
+    // กลุ่มค่าคำนวณจาก Operations
+    const allCycleTimes = operations.map(item => item.amv / item.op); // ค่า Cycle Time ของทุกสถานี
+    const maxCycleValue = Math.max(...allCycleTimes); // ค่า Cycle Time สูงสุด
+
+    // กลุ่มค่าคำนวณจาก Input
+    const taktTime = (demand > 0) ? (7 * 3600 * days / demand) : 0; // จังหวะการผลิต (วินาที/ชิ้น)
+    const reqOutHr = (demand > 0) ? (demand / (7 * days)) : 0; // ผลผลิตที่ต้องการต่อชั่วโมง
+     
+
+    // กลุ่ม Helper & DOM
+    const setSafeText = (id, value) => {const el = document.getElementById(id); // อัปเดตข้อความใน DOM แบบปลอดภัย
     if (el) el.innerText = value;
     };
-
-    const tbody = document.getElementById('opTableBody');
+    const tbody = document.getElementById('opTableBody'); // DOM element ของตาราง
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // 2. เตรียมตัวแปรสำหรับเก็บผลลัพธ์
+    // เตรียมตัวแปรสำหรับเก็บผลลัพธ์
     let labels = [], wipData = [], capData = [], outputData = [], layoutInfo = [];
     let totalSAM = 0, totalAMV = 0, totalOp = 0, maxCycleTime = 0;
 
     // คำนวณเบื้องต้นของแต่ละขั้นตอน
-    let stepResults = operations.map(item => {
-        const capHr = Math.floor((3600 / item.amv) * item.op);
-        const cycleTime = item.amv / item.op;
-        return { ...item, capHr, cycleTime };
+    let stepResults = operations.map(item => {const capHr = Math.floor((3600 / item.amv) * item.op); // ข้อมูลสถานี + capHr, cycleTime
+    const cycleTime = item.amv / item.op;
+    return { ...item, capHr, cycleTime };
     });
 
-    // 3. คำนวณ WIP และ Flow การผลิต (Process Logic)
+    // ตัวแปรใน loop forEach (แต่ละสถานี)
     stepResults.forEach((item, index) => {
-        const isBottleneck = item.cycleTime.toFixed(2) === maxCycleValue.toFixed(2);
-        
-      
-        const totalCap = item.capHr * hours;
-        let inputFromPrev = (index === 0) ? totalCap : stepResults[index - 1].passed;
-        let actualProcessed = Math.min(inputFromPrev, totalCap);
-        let nextCap = (index === stepResults.length - 1) ? actualProcessed : (stepResults[index + 1].capHr * hours);
-        
-        let wip = actualProcessed - nextCap;
-        let passed = (index > 0) ? Math.min(actualProcessed, item.capHr) : actualProcessed;
+        const isBottleneck = item.cycleTime.toFixed(2) === maxCycleValue.toFixed(2); // เป็นคอขวดหรือไม่
+        const totalCap = item.capHr * hours; // กำลังการผลิตทั้งหมด
+        let inputFromPrev = (index === 0) ? totalCap : stepResults[index - 1].passed; // งานที่รับจากสถานีก่อนหน้า
+        let actualProcessed = Math.min(inputFromPrev, totalCap); // งานที่ผลิตได้จริง
+        let nextCap = (index === stepResults.length - 1) ? actualProcessed : (stepResults[index + 1].capHr * hours); // กำลังผลิตของสถานีถัดไป
+        let wip = actualProcessed - nextCap; // งานค้าง (WIP)
+        let passed = (index > 0) ? Math.min(actualProcessed, item.capHr) : actualProcessed; // งานที่ส่งไปให้สถานีถัดไป
 
         item.passed = passed;
         
@@ -187,29 +189,31 @@ let operations = [
             </tr>`;
     });
 
-    // 4. คำนวณตัวชี้วัดประสิทธิภาพ
-    const pitchTime = totalOp > 0 ? (totalSAM / totalOp) : 0;
-    const balance = (maxCycleTime > 0 && totalOp > 0) 
-                    ? (totalSAM / (maxCycleTime * totalOp)) * 100 
-                    : 0;
-    const lineOutputHr = maxCycleTime > 0 ? Math.floor(3600 / maxCycleTime) : 0;
-      
+    // กลุ่มตัวชี้วัดประสิทธิภาพ
+    const pitchTime = packsize > 0 ? (taktTime * packsize) : 0; // เวลาที่ฝ่ายผลิตส่งมอบงานในปริมาณที่กำหนด
+    const balance = (maxCycleTime > 0 && totalOp > 0) ? (totalAMV / (maxCycleTime * totalOp)) * 100 : 0; // สมดุลของสายการผลิต
+    const uclValue = taktTime * 1.05; // UCL
+    const lclValue = taktTime * 0.95; // LCL
+    const lineOutputHr = maxCycleTime > 0 ? Math.floor(3600 / maxCycleTime) : 0; // Outputจริง ต่อชั่วโมง
+    const totalOutput = lineOutputHr * 7 * days; // Outputจริง ทั้งหมด
+    const totalAvailableMinutes = totalOp * (7 * 60 * days); // เวลาทำงานจริง ทั้งหมด
+    const avgEffValue = totalSAM > 0 ? ((totalSAM * lineOutputHr) / (totalOp * 3600)) * 100 : 0; // ประสิทธิภาพ
 
-    // 5. รวบรวมข้อมูลทั้งหมดส่งไปยังส่วนต่างๆ
+// 5. รวบรวมข้อมูลทั้งหมดส่งไปยังส่วนต่างๆ
     const currentMetrics = {
-        totalSAM,
-        totalAMV,
-        totalOp,
-        avgEff: totalAMV > 0 ? (totalSAM / totalAMV) * 100 : 0,
-        balance,
-        pitchTime,
-        ucl: pitchTime * 1.05,
-        lcl: pitchTime * 0.95,
-        maxCycle: maxCycleTime,
-        output: lineOutputHr,
-        taktReq: taktTime,
-        targetHr: reqOutHr
-    };
+    totalSAM,
+    totalAMV,
+    totalOp,
+    avgEff: avgEffValue,
+    balance: balance,
+    pitchTime,
+    ucl: uclValue,
+    lcl: lclValue,
+    maxCycle: maxCycleTime,
+    output: lineOutputHr,
+    taktReq: taktTime,
+    targetHr: reqOutHr
+};
 
     // อัปเดตข้อมูลสรุปแบบกระจายศูนย์
     setSafeText('sumSAM', totalSAM.toFixed(1));
@@ -217,7 +221,7 @@ let operations = [
     setSafeText('sumOp', totalOp.toFixed(1));
     setSafeText('avgEff', currentMetrics.avgEff.toFixed(1) + "%");
     setSafeText('balance', balance.toFixed(1) + "%");
-    setSafeText('pitchTime', pitchTime.toFixed(1));
+    setSafeText('pitchTime', pitchTime.toFixed(0));
     setSafeText('uclTime', currentMetrics.ucl.toFixed(1));
     setSafeText('lclTime', currentMetrics.lcl.toFixed(1));
     setSafeText('maxCycle', maxCycleTime.toFixed(1));
@@ -257,65 +261,78 @@ let operations = [
             targetHr = 0
         } = metricsData;
 
-        // กำหนดเงื่อนไขสีตาม
+        // กำหนดเงื่อนไขและสูตรการคำนวณสำหรับ Tooltip
         const metrics = [
             { 
                 label: 'Total SAM', 
                 val: totalSAM.toFixed(1), 
-                color: 'text-slate-600' 
+                color: 'text-slate-600',
+                formula: 'เวลารวมของ SAM ทุกขั้นตอน'
             },
             { 
                 label: 'Total AMV', 
                 val: totalAMV.toFixed(1), 
-                color: totalAMV <= totalSAM ? 'text-green-600' : 'text-red-600' 
+                color: totalAMV <= totalSAM ? 'text-green-600' : 'text-red-600',
+                formula: 'เวลารวมของขั้นตอนทำงานจริงทุกขั้นตอน'
             },
             { 
                 label: 'Total Op', 
                 val: totalOp.toFixed(1), 
-                color: 'text-blue-600' 
+                color: 'text-blue-600',
+                formula: 'จำนวนพนักงานทั้งหมดในสายผลิต'
             },
             { 
                 label: 'Avg Eff', 
                 val: avgEff.toFixed(1) + "%", 
-                color: avgEff >= 80 ? 'text-green-600' : 'text-red-600' 
+                color: avgEff >= 80 ? 'text-green-600' : 'text-red-600',
+                formula: '(Output × SAM) / (Manpower × Working Time)'
             },
             { 
                 label: 'Balance', 
                 val: balance.toFixed(1) + "%", 
-                color: balance >= 95 ? 'text-green-600' : 'text-red-600' 
+                color: balance >= 95 ? 'text-green-600' : 'text-red-600',
+                formula: 'AMV / Manpower x Cycle Time'
             },
             { 
                 label: 'Pitch Time', 
-                val: pitchTime.toFixed(1), 
-                color: 'text-orange-600' 
+                val: pitchTime.toFixed(0), 
+                color: 'text-orange-600',
+                formula: 'Takt Time x Pack Size'
             },
             { 
                 label: 'UCL', 
                 val: ucl.toFixed(1), 
-                color: 'text-slate-500' 
+                color: 'text-slate-500',
+                formula: 'Takt Time x 1.05'
             },
             { 
                 label: 'LCL', 
                 val: lcl.toFixed(1), 
-                color: 'text-slate-500' 
+                color: 'text-slate-500', 
+                formula: 'Takt Time x 0.95'
             },
             { 
                 label: 'Max Cycle', 
-                val: maxCycle.toFixed(1), 
-                color: maxCycle <= taktReq ? 'text-green-600' : 'text-red-600' 
+                val: maxCycle.toFixed(0), 
+                color: maxCycle <= taktReq ? 'text-green-600' : 'text-red-600',
+                formula: 'ขั้นตอนที่ที่ใช้เวลามากที่สุด(คอขวด)'
             },
             { 
                 label: 'Output', 
                 val: Math.floor(output).toLocaleString(), 
-                color: output >= targetHr ? 'text-green-600' : 'text-red-600' 
+                color: output >= targetHr ? 'text-green-600' : 'text-red-600',
+                formula: '3600 / Max Cycle'
             }
         ];
 
-        // วาด Dashboard ลงใน Header
+        // วาด Dashboard ลงใน Header พร้อม Tooltip
         summaryHeader.className = "grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2 mb-6";
         summaryHeader.innerHTML = metrics.map(m => `
-            <div class="bg-white border border-slate-200 p-2 rounded-xl text-center shadow-sm transition-all hover:shadow-md">
-                <div class="text-[9px] uppercase text-slate-400 font-bold tracking-tighter leading-tight">${m.label}</div>
+            <div class="bg-white border border-slate-200 p-2 rounded-xl text-center shadow-sm transition-all hover:shadow-md cursor-help" 
+                 title="${m.formula}">
+                <div class="text-[9px] uppercase text-slate-400 font-bold tracking-tighter leading-tight">
+                    ${m.label} <span class="text-[8px]">ⓘ</span>
+                </div>
                 <div class="text-sm font-black ${m.color}">${m.val}</div>
             </div>
         `).join('');
